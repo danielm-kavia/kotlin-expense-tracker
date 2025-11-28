@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.layout.weight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.weight
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -72,6 +74,8 @@ fun ExpenseTrackerScreen() {
     val items = remember { mutableStateListOf<Item>() }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val form = remember { mutableStateOf(FormState()) }
+    // Channel snackbar messages through state so we trigger snackbar from a composable scope
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
 
     // Seed with a couple demo items for UX
     LaunchedEffect(Unit) {
@@ -133,10 +137,8 @@ fun ExpenseTrackerScreen() {
                 onSubmit = { result ->
                     when (result) {
                         is SubmitResult.Error -> {
-                            // Trigger snackbar as a side-effect on state change
-                            LaunchedEffect(result.message) {
-                                snackbarHostState.showSnackbar(result.message)
-                            }
+                            // Set message to trigger snackbar from a composable LaunchedEffect below
+                            snackbarMessage = result.message
                         }
 
                         is SubmitResult.Saved -> {
@@ -159,6 +161,14 @@ fun ExpenseTrackerScreen() {
                     }
                 }
             )
+
+            // Show snackbar when message changes
+            LaunchedEffect(snackbarMessage) {
+                snackbarMessage?.let {
+                    snackbarHostState.showSnackbar(it)
+                    snackbarMessage = null
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -437,14 +447,15 @@ private fun TransactionList(
                 Text(item.date.format(DateTimeFormatter.ISO_DATE), modifier = Modifier.weight(1.2f))
                 Row(modifier = Modifier.weight(1.3f), verticalAlignment = Alignment.CenterVertically) {
                     val color = cat?.colorHex?.let { hexToColor(it) } ?: MaterialTheme.colorScheme.primary
+                    // Small color square/pill before category title
                     Box(
                         modifier = Modifier
+                            .width(12.dp)
                             .height(12.dp)
                             .clip(RoundedCornerShape(2.dp))
                             .background(color)
-                            .padding(end = 6.dp)
                     )
-                    Spacer(Modifier.height(0.dp))
+                    Spacer(Modifier.width(6.dp))
                     Text(cat?.title ?: item.categoryKey)
                 }
                 Text(item.title, modifier = Modifier.weight(1.5f))
