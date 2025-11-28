@@ -15,8 +15,3 @@ Notes:
 Module structure:
 - settings.gradle.kts includes ':app'
 - app module contains a minimal MainActivity with a simple TextView UI.
-
-State & lifecycle:
-- ViewModel exposes StateFlow for currentMonth, filteredTransactions, totalIncome, totalExpenses, and balance.
-- lifecycle-runtime-ktx is used with repeatOnLifecycle to safely collect flows.
-- lifecycle-livedata-ktx is included for future LiveData interop if parts of UI adopt LiveData.
