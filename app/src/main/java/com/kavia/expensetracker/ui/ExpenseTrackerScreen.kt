@@ -7,12 +7,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
@@ -56,15 +63,35 @@ private data class FormState(
     var editingId: Long? = null
 )
 
+private fun defaultForm(): FormState = FormState(
+    dateText = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
+    categoryKey = categories.keys.firstOrNull() ?: "other",
+    title = "",
+    valueText = "",
+    editingId = null
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * PUBLIC_INTERFACE
+ * ExpenseTrackerScreen renders the single-screen UI for the app:
+ * - Month navigation (now compact icon-only buttons)
+ * - Summary totals
+ * - Add/Edit transaction dialog (FAB to open)
+ * - Transaction list without actions column
+ *
+ * All state is in-memory; no persistence.
+ */
 @Composable
 fun ExpenseTrackerScreen() {
     val snackbarHostState = remember { SnackbarHostState() }
     val items = remember { mutableStateListOf<Item>() }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
-    val form = remember { mutableStateOf(FormState()) }
-    // Channel snackbar messages through state so we trigger snackbar from a composable scope
+    val form = remember { mutableStateOf(defaultForm()) }
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
+
+    // Dialog state for add/edit
+    var showDialog by remember { mutableStateOf(false) }
 
     // Seed with a couple demo items for UX
     LaunchedEffect(Unit) {
@@ -102,82 +129,96 @@ fun ExpenseTrackerScreen() {
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            TopAppBar(
-                title = { Text("Expense Tracker") }
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                TopAppBar(
+                    title = { Text("Expense Tracker") }
+                )
 
-            MonthHeader(
-                currentMonth = currentMonth,
-                onPrev = { currentMonth = prevMonth(currentMonth) },
-                onNext = { currentMonth = nextMonth(currentMonth) }
-            )
+                MonthHeader(
+                    currentMonth = currentMonth,
+                    onPrev = { currentMonth = prevMonth(currentMonth) },
+                    onNext = { currentMonth = nextMonth(currentMonth) }
+                )
 
-            SummaryCards(
-                income = totals.first,
-                expense = totals.second,
-                balance = totals.third
-            )
+                SummaryCards(
+                    income = totals.first,
+                    expense = totals.second,
+                    balance = totals.third
+                )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            TransactionForm(
-                formState = form,
-                onSubmit = { result ->
-                    when (result) {
-                        is SubmitResult.Error -> {
-                            // Set message to trigger snackbar from a composable LaunchedEffect below
-                            snackbarMessage = result.message
-                        }
-
-                        is SubmitResult.Saved -> {
-                            // update or add
-                            val existingIndex = items.indexOfFirst { it.id == result.item.id }
-                            if (existingIndex >= 0) {
-                                items[existingIndex] = result.item
-                            } else {
-                                items.add(0, result.item) // newest first
-                            }
-                            // reset form
-                            form.value = FormState(
-                                dateText = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-                                categoryKey = categories.keys.firstOrNull() ?: "other",
-                                title = "",
-                                valueText = "",
-                                editingId = null
-                            )
-                        }
+                // Show snackbar when message changes
+                LaunchedEffect(snackbarMessage) {
+                    snackbarMessage?.let {
+                        snackbarHostState.showSnackbar(it)
+                        snackbarMessage = null
                     }
                 }
-            )
 
-            // Show snackbar when message changes
-            LaunchedEffect(snackbarMessage) {
-                snackbarMessage?.let {
-                    snackbarHostState.showSnackbar(it)
-                    snackbarMessage = null
-                }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                TransactionList(
+                    items = monthItems,
+                    onItemClick = { item ->
+                        // Open dialog in edit mode
+                        form.value = FormState(
+                            dateText = item.date.format(DateTimeFormatter.ISO_DATE),
+                            categoryKey = item.categoryKey,
+                            title = item.title,
+                            valueText = item.value.toPlainString(),
+                            editingId = item.id
+                        )
+                        showDialog = true
+                    }
+                )
+
+                SnackbarHost(hostState = snackbarHostState)
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TransactionList(
-                items = monthItems,
-                onEdit = { item ->
-                    form.value = FormState(
-                        dateText = item.date.format(DateTimeFormatter.ISO_DATE),
-                        categoryKey = item.categoryKey,
-                        title = item.title,
-                        valueText = item.value.toPlainString(),
-                        editingId = item.id
-                    )
+            // Floating action button to open the add transaction dialog
+            FloatingActionButton(
+                onClick = {
+                    form.value = defaultForm()
+                    showDialog = true
                 },
-                onDelete = { item ->
-                    items.removeAll { it.id == item.id }
-                }
-            )
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Adicionar transação")
+            }
 
-            SnackbarHost(hostState = snackbarHostState)
+            if (showDialog) {
+                AddEditTransactionDialog(
+                    formState = form,
+                    onDismiss = {
+                        showDialog = false
+                        // Reset form when dismissing (no changes saved)
+                        form.value = defaultForm()
+                    },
+                    onSubmit = { result ->
+                        when (result) {
+                            is SubmitResult.Error -> {
+                                // Show error, keep dialog open
+                                snackbarMessage = result.message
+                            }
+                            is SubmitResult.Saved -> {
+                                val existingIndex = items.indexOfFirst { it.id == result.item.id }
+                                if (existingIndex >= 0) {
+                                    items[existingIndex] = result.item
+                                } else {
+                                    items.add(0, result.item) // newest first
+                                }
+                                // Reset and close dialog
+                                form.value = defaultForm()
+                                showDialog = false
+                            }
+                        }
+                    }
+                )
+            }
         }
     }
 }
@@ -192,13 +233,17 @@ private fun MonthHeader(currentMonth: YearMonth, onPrev: () -> Unit, onNext: () 
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Button(onClick = onPrev) { Text("< Mês anterior") }
+        IconButton(onClick = onPrev) {
+            Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Mês anterior")
+        }
         Text(
             text = title.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
-        Button(onClick = onNext) { Text("Próximo mês >") }
+        IconButton(onClick = onNext) {
+            Icon(imageVector = Icons.Filled.ArrowForward, contentDescription = "Próximo mês")
+        }
     }
 }
 
@@ -242,67 +287,83 @@ private sealed interface SubmitResult {
 }
 
 @Composable
-private fun TransactionForm(
+private fun CategoryRow(selectedKey: String, onSelected: (String) -> Unit) {
+    Row(
+        modifier = Modifier
+            .horizontalScroll(rememberScrollState())
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        categories.values.forEach { cat ->
+            val selected = cat.key == selectedKey
+            FilterChip(
+                selected = selected,
+                onClick = { onSelected(cat.key) },
+                label = { Text(cat.title) },
+                leadingIcon = {},
+                modifier = Modifier.padding(vertical = 2.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddEditTransactionDialog(
     formState: MutableState<FormState>,
+    onDismiss: () -> Unit,
     onSubmit: (SubmitResult) -> Unit
 ) {
     val form = formState.value
-    val scroll = rememberScrollState()
 
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-            .padding(12.dp)
-            .verticalScroll(scroll)
-    ) {
-        Text(
-            text = if (form.editingId == null) "Adicionar transação" else "Editar transação",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(Modifier.height(8.dp))
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = if (form.editingId == null) "Adicionar transação" else "Editar transação",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = form.dateText,
+                    onValueChange = { formState.value = form.copy(dateText = it) },
+                    label = { Text("Data (YYYY-MM-DD)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-        OutlinedTextField(
-            value = form.dateText,
-            onValueChange = { formState.value = form.copy(dateText = it) },
-            label = { Text("Data (YYYY-MM-DD)") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
+                Spacer(Modifier.height(8.dp))
 
-        Spacer(Modifier.height(8.dp))
+                CategoryRow(
+                    selectedKey = form.categoryKey,
+                    onSelected = { formState.value = form.copy(categoryKey = it) }
+                )
 
-        CategoryRow(
-            selectedKey = form.categoryKey,
-            onSelected = { formState.value = form.copy(categoryKey = it) }
-        )
+                Spacer(Modifier.height(8.dp))
 
-        Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = form.title,
+                    onValueChange = { formState.value = form.copy(title = it) },
+                    label = { Text("Título/Descrição") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-        OutlinedTextField(
-            value = form.title,
-            onValueChange = { formState.value = form.copy(title = it) },
-            label = { Text("Título/Descrição") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
+                Spacer(Modifier.height(8.dp))
 
-        Spacer(Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = form.valueText,
-            onValueChange = { formState.value = form.copy(valueText = it) },
-            label = { Text("Valor (ex: 123.45)") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = form.valueText,
+                    onValueChange = { formState.value = form.copy(valueText = it) },
+                    label = { Text("Valor (ex: 123.45)") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
             Button(onClick = {
                 val date = parseDateOrNull(form.dateText)
                 if (date == null) {
@@ -339,51 +400,19 @@ private fun TransactionForm(
             }) {
                 Text(if (form.editingId == null) "Adicionar" else "Salvar")
             }
-
-            if (form.editingId != null) {
-                Button(onClick = {
-                    // Cancel editing and reset
-                    formState.value = FormState(
-                        dateText = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-                        categoryKey = categories.keys.firstOrNull() ?: "other",
-                        title = "",
-                        valueText = "",
-                        editingId = null
-                    )
-                }) {
-                    Text("Cancelar")
-                }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancelar")
             }
         }
-    }
-}
-
-@Composable
-private fun CategoryRow(selectedKey: String, onSelected: (String) -> Unit) {
-    Row(
-        modifier = Modifier
-            .horizontalScroll(rememberScrollState())
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        categories.values.forEach { cat ->
-            val selected = cat.key == selectedKey
-            FilterChip(
-                selected = selected,
-                onClick = { onSelected(cat.key) },
-                label = { Text(cat.title) },
-                leadingIcon = {},
-                modifier = Modifier.padding(vertical = 2.dp)
-            )
-        }
-    }
+    )
 }
 
 @Composable
 private fun TransactionList(
     items: List<Item>,
-    onEdit: (Item) -> Unit,
-    onDelete: (Item) -> Unit
+    onItemClick: (Item) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -404,7 +433,7 @@ private fun TransactionList(
             return
         }
 
-        // Header
+        // Header (removed "Ações" column)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -415,7 +444,6 @@ private fun TransactionList(
             Text("Categoria", modifier = Modifier.weight(1.3f), fontWeight = FontWeight.SemiBold)
             Text("Título", modifier = Modifier.weight(1.5f), fontWeight = FontWeight.SemiBold)
             Text("Valor", modifier = Modifier.weight(1.0f), fontWeight = FontWeight.SemiBold)
-            Text("Ações", modifier = Modifier.weight(0.8f), fontWeight = FontWeight.SemiBold)
         }
         Divider()
 
@@ -428,7 +456,7 @@ private fun TransactionList(
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .clickable { onEdit(item) }
+                    .clickable { onItemClick(item) }
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -454,10 +482,6 @@ private fun TransactionList(
                     color = if (isExpense) Color(0xFFD32F2F) else Color(0xFF388E3C),
                     fontWeight = FontWeight.Medium
                 )
-                Row(modifier = Modifier.weight(0.8f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { onEdit(item) }) { Text("Editar") }
-                    Button(onClick = { onDelete(item) }) { Text("Excluir") }
-                }
             }
             Divider()
         }
