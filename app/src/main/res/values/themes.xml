@@ -1,0 +1,4 @@
+<resources>
+    <!-- Use a built-in platform theme to ensure availability without extra dependencies -->
+    <style name="Theme.KotlinExpenseTracker" parent="android:Theme.Holo.Light.NoActionBar" />
+</resources>
