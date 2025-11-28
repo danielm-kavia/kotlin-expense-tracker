@@ -1,0 +1,2 @@
+# Ensure gradlew retains executable permission across platforms/CI
+gradlew text eol=lf

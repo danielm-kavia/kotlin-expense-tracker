@@ -1,4 +1,0 @@
-This sentinel file indicates the Android project is not yet scaffolded for Gradle builds.
-CI pipelines should skip running ./gradlew or any Gradle tasks in kotlin-expense-tracker while this file exists.
-
-Remove this file once settings.gradle(.kts), an app module (app/build.gradle[.kts]), and source sets are added.
