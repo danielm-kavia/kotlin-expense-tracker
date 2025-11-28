@@ -3,17 +3,113 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp">
 
-    <TextView
-        android:id="@+id/helloText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Carregando..."
-        android:textSize="18sp"
-        android:padding="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+    <!-- Month navigation row -->
+    <ImageButton
+        android:id="@+id/btnPrev"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:contentDescription="@string/app_name"
+        android:src="@android:drawable/ic_media_previous"
+        app:tint="@color/purple_500"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvMonth"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="---/----"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        app:layout_constraintStart_toEndOf="@id/btnPrev"
+        app:layout_constraintEnd_toStartOf="@id/btnNext"
+        app:layout_constraintTop_toTopOf="@id/btnPrev"
+        app:layout_constraintBottom_toBottomOf="@id/btnPrev" />
+
+    <ImageButton
+        android:id="@+id/btnNext"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:contentDescription="@string/app_name"
+        android:src="@android:drawable/ic_media_next"
+        app:tint="@color/purple_500"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btnPrev" />
+
+    <!-- Summary section -->
+    <TextView
+        android:id="@+id/labelIncome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Receitas:"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/btnPrev"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="24dp" />
+
+    <TextView
+        android:id="@+id/tvIncome"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="R$ 0,00"
+        app:layout_constraintStart_toEndOf="@id/labelIncome"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBaseline_toBaselineOf="@id/labelIncome"
+        android:layout_marginStart="8dp" />
+
+    <TextView
+        android:id="@+id/labelExpenses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Despesas:"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/labelIncome"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="12dp" />
+
+    <TextView
+        android:id="@+id/tvExpenses"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="R$ 0,00"
+        app:layout_constraintStart_toEndOf="@id/labelExpenses"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBaseline_toBaselineOf="@id/labelExpenses"
+        android:layout_marginStart="8dp" />
+
+    <TextView
+        android:id="@+id/labelBalance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Saldo:"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/labelExpenses"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="12dp" />
+
+    <TextView
+        android:id="@+id/tvBalance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="R$ 0,00"
+        app:layout_constraintStart_toEndOf="@id/labelBalance"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBaseline_toBaselineOf="@id/labelBalance"
+        android:layout_marginStart="8dp" />
+
+    <!-- Simple placeholder to show number of filtered transactions -->
+    <TextView
+        android:id="@+id/tvTransactionsCount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Itens do mês: 0"
+        app:layout_constraintTop_toBottomOf="@id/tvBalance"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
