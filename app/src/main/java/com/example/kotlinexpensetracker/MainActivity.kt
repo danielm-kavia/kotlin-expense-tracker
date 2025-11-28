@@ -1,23 +1,22 @@
 package com.example.kotlinexpensetracker
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.kotlinexpensetracker.databinding.ActivityMainBinding
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import com.example.kotlinexpensetracker.utils.CurrencyUtils
+import kotlinx.coroutines.launch
 
 /**
  * PUBLIC_INTERFACE
  * MainActivity
  *
  * A minimal launcher activity that displays a simple text.
- * This satisfies CI build requirements for a runnable application.
- * Additionally wires a ViewModel instance and logs state changes to confirm
- * StateFlow is properly working (useful in early CI without full UI).
+ * Wires a ViewModel instance and observes StateFlow to update the UI,
+ * avoiding placeholder logs.
  */
 class MainActivity : AppCompatActivity() {
 
@@ -35,27 +34,37 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         title = "Kotlin Expense Tracker"
-        binding.helloText.text = "Hello from Kotlin Expense Tracker!"
-
-        // Observe ViewModel state as a sanity check; log to Logcat
-        observeViewModel()
+        setupObservers()
     }
 
-    private fun observeViewModel() {
-        viewModel.monthLabel
-            .onEach { Log.d("MainActivity", "Month label: $it") }
-            .launchIn(lifecycleScope)
-
-        viewModel.totalIncome
-            .onEach { Log.d("MainActivity", "Income: $it") }
-            .launchIn(lifecycleScope)
-
-        viewModel.totalExpenses
-            .onEach { Log.d("MainActivity", "Expenses: $it") }
-            .launchIn(lifecycleScope)
-
-        viewModel.balance
-            .onEach { Log.d("MainActivity", "Balance: $it") }
-            .launchIn(lifecycleScope)
+    private fun setupObservers() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.monthLabel.collect { label ->
+                        binding.helloText.text = "Mês: $label"
+                    }
+                }
+                launch {
+                    viewModel.balance.collect { balance ->
+                        val text = "Saldo: ${CurrencyUtils.formatBRL(balance)}"
+                        // Append under month for now in the single TextView
+                        binding.helloText.text = "${binding.helloText.text}\n$text"
+                    }
+                }
+                launch {
+                    viewModel.totalIncome.collect { income ->
+                        val text = "Receitas: ${CurrencyUtils.formatBRL(income)}"
+                        binding.helloText.text = "${binding.helloText.text}\n$text"
+                    }
+                }
+                launch {
+                    viewModel.totalExpenses.collect { expenses ->
+                        val text = "Despesas: ${CurrencyUtils.formatBRL(expenses)}"
+                        binding.helloText.text = "${binding.helloText.text}\n$text"
+                    }
+                }
+            }
+        }
     }
 }

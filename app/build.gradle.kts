@@ -65,6 +65,8 @@ dependencies {
     // Lifecycle and ViewModel + KTX (for viewModelScope and activity viewModels())
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    // LiveData KTX to ensure easy interop if UI components use LiveData observers
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.6")
     implementation("androidx.activity:activity-ktx:1.9.3")
 
     testImplementation("junit:junit:4.13.2")

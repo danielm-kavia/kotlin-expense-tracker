@@ -37,20 +37,28 @@ class MainViewModel(
 ) : ViewModel() {
 
     private val _currentMonthId = MutableStateFlow(DateUtils.currentMonthId())
-    /** PUBLIC_INTERFACE */
+    /** PUBLIC_INTERFACE
+     * Current month identifier in "yyyy-MM".
+     */
     val currentMonthId: StateFlow<String> = _currentMonthId
 
-    /** PUBLIC_INTERFACE */
+    /** PUBLIC_INTERFACE
+     * Month label like "Mar/2025" (pt-BR).
+     */
     val monthLabel: StateFlow<String> =
         _currentMonthId
             .map { DateUtils.formatMonthLabel(it) }
             .stateIn(viewModelScope, SharingStarted.Eagerly, DateUtils.formatMonthLabel(_currentMonthId.value))
 
-    /** PUBLIC_INTERFACE */
+    /** PUBLIC_INTERFACE
+     * All items from the repository.
+     */
     val allItems: StateFlow<List<Item>> = transactionsRepository.items
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    /** PUBLIC_INTERFACE */
+    /** PUBLIC_INTERFACE
+     * Items filtered to the currently selected month.
+     */
     val filteredItems: StateFlow<List<Item>> =
         combine(allItems, _currentMonthId) { items, monthId ->
             items.filter { item ->
@@ -59,7 +67,14 @@ class MainViewModel(
             }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    /** PUBLIC_INTERFACE */
+    /** PUBLIC_INTERFACE
+     * Alias exposed for platform parity with "filteredTransactions".
+     */
+    val filteredTransactions: StateFlow<List<Item>> = filteredItems
+
+    /** PUBLIC_INTERFACE
+     * Sum of income values in the current month.
+     */
     val totalIncome: StateFlow<BigDecimal> =
         filteredItems.map { items ->
             items.fold(BigDecimal.ZERO) { acc, item ->
@@ -68,7 +83,9 @@ class MainViewModel(
             }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, BigDecimal.ZERO)
 
-    /** PUBLIC_INTERFACE */
+    /** PUBLIC_INTERFACE
+     * Sum of expense values in the current month.
+     */
     val totalExpenses: StateFlow<BigDecimal> =
         filteredItems.map { items ->
             items.fold(BigDecimal.ZERO) { acc, item ->
@@ -77,7 +94,9 @@ class MainViewModel(
             }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, BigDecimal.ZERO)
 
-    /** PUBLIC_INTERFACE */
+    /** PUBLIC_INTERFACE
+     * Net balance = income - expenses.
+     */
     val balance: StateFlow<BigDecimal> =
         combine(totalIncome, totalExpenses) { income, expenses ->
             income - expenses
