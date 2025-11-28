@@ -68,7 +68,8 @@ class MainViewModel(
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     /** PUBLIC_INTERFACE
-     * Alias exposed for platform parity with "filteredTransactions".
+     * Alias exposed for platform parity with "filteredTransactions". This ensures
+     * Activity/UI collects the exact flow name required by the spec.
      */
     val filteredTransactions: StateFlow<List<Item>> = filteredItems
 

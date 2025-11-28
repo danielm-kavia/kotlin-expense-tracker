@@ -41,6 +41,10 @@ class MainActivity : AppCompatActivity() {
         title = "Kotlin Expense Tracker"
 
         setupClicks()
+        // Collect StateFlows using repeatOnLifecycle to keep UI updated with:
+        // - monthLabel
+        // - totalIncome, totalExpenses, balance (formatted in BRL)
+        // - filteredTransactions count as a placeholder
         setupObservers()
     }
 

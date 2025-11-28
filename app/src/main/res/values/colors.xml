@@ -3,4 +3,12 @@
     <color name="purple_500">#6200EE</color>
     <color name="purple_700">#3700B3</color>
     <color name="teal_200">#03DAC5</color>
+
+    <!-- Summary semantics -->
+    <color name="summary_income_bg">#E8F5E9</color>   <!-- light green -->
+    <color name="summary_income_fg">#2E7D32</color>  <!-- green text -->
+    <color name="summary_expense_bg">#FFEBEE</color> <!-- light red -->
+    <color name="summary_expense_fg">#C62828</color> <!-- red text -->
+    <color name="summary_balance_bg">#E3F2FD</color> <!-- light blue -->
+    <color name="summary_balance_fg">#1565C0</color> <!-- blue text -->
 </resources>
