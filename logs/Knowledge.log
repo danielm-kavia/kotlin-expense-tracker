@@ -135,3 +135,30 @@
 2025-11-28 06:56:26,020 - Knowledge - INFO - ⚡ Total Redis path: 3.87s (vs ~300s from disk)
 2025-11-28 06:56:26,261 - Knowledge - INFO - Saving knowledge to Redis...
 2025-11-28 06:56:26,491 - Knowledge - INFO - Knowledge saved to Redis successfully
+2025-11-28 22:36:03,990 - Knowledge - INFO - Created shared MongoDB connection pool
+2025-11-28 22:36:04,330 - Knowledge - INFO - Starting Knowledge Graph processing with 20 threads
+2025-11-28 22:36:04,541 - Knowledge - INFO - Initial configuration: chunk_size=65536, max_cache_size=500
+2025-11-28 22:36:04,708 - Knowledge - INFO - Knowledge Graph concurrency configuration: workers=20, max_batch_size=25, max_concurrent_llm_calls=50
+2025-11-28 22:36:05,801 - Knowledge - INFO - 🔍 _load_persisted_knowledge called - checking for Redis optimization
+2025-11-28 22:36:06,000 - Knowledge - WARNING - ❌ load_from_redis method not found - Redis support not attached
+2025-11-28 22:36:06,196 - Knowledge - INFO - load persisted knowledge: begin
+2025-11-28 22:36:06,439 - Knowledge - INFO - Persisted knowledge files in /app/data/T0015/282063/b406986/kotlin-expense-tracker/.knowledge have been renamed to use .json
+2025-11-28 22:36:06,635 - Knowledge - INFO - Found code-base-name: https://github.com/danielm-kavia/kotlin-expense-tracker.git:main
+2025-11-28 22:36:06,842 - Knowledge - INFO - Found code_base: <app.utils.kg_build.knowledge.KnowledgeCodeBase object at 0x7f0bd87c9390>
+2025-11-28 22:36:07,058 - Knowledge - INFO - process ingested knowledge for /app/data/T0015/282063/b406986/kotlin-expense-tracker/README.md
+2025-11-28 22:36:07,276 - Knowledge - INFO - Loaded 1 files from persisted knowledge
+2025-11-28 22:36:07,498 - Knowledge - INFO - load persisted knowledge: end
+2025-11-28 22:36:07,667 - Knowledge - INFO - Redis support added with prefix knowledge:b406986:
+2025-11-28 22:36:07,931 - Knowledge - INFO - Starting knowledge initialization for ID: LWWQDw-b406986
+2025-11-28 22:36:08,176 - Knowledge - INFO - 🔍 Checking Redis for build_id: b406986
+2025-11-28 22:36:08,390 - Knowledge - INFO - 🔍 Full session ID: LWWQDw-b406986
+2025-11-28 22:36:08,581 - Knowledge - INFO - 🔍 Redis prefix will be: knowledge:b406986:
+2025-11-28 22:36:08,796 - Knowledge - INFO - 🔍 Using attached load_from_redis() method
+2025-11-28 22:36:09,016 - Knowledge - INFO - 🔍 Attempting to load knowledge from Redis...
+2025-11-28 22:36:09,184 - Knowledge - INFO - 🔍 Using derived instance_id for Redis lookup: b406986
+2025-11-28 22:36:11,897 - Knowledge - INFO - ✅ Redis cache found! Loading knowledge...
+2025-11-28 22:36:12,068 - Knowledge - INFO - ✅ Successfully loaded from Redis: 1 files
+2025-11-28 22:36:12,243 - Knowledge - INFO - ✅ Redis load complete: 1 files in 3.45s
+2025-11-28 22:36:12,460 - Knowledge - INFO - ⚡ Total Redis path: 3.45s (vs ~300s from disk)
+2025-11-28 22:36:12,710 - Knowledge - INFO - Saving knowledge to Redis...
+2025-11-28 22:36:12,925 - Knowledge - INFO - Knowledge saved to Redis successfully
