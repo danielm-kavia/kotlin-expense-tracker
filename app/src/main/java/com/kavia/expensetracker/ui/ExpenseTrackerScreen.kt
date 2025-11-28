@@ -8,18 +8,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -30,7 +29,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -113,8 +111,7 @@ fun ExpenseTrackerScreen() {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
-                title = { Text("Expense Tracker") },
-                scrollBehavior = rememberTopAppBarState().let { null }
+                title = { Text("Expense Tracker") }
             )
 
             MonthHeader(
@@ -136,6 +133,7 @@ fun ExpenseTrackerScreen() {
                 onSubmit = { result ->
                     when (result) {
                         is SubmitResult.Error -> {
+                            // Trigger snackbar as a side-effect on state change
                             LaunchedEffect(result.message) {
                                 snackbarHostState.showSnackbar(result.message)
                             }
@@ -213,21 +211,21 @@ private fun SummaryCards(income: BigDecimal, expense: BigDecimal, balance: BigDe
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        SummaryCard("Entradas", formatBRL(income), Color(0xFF43A047))
-        SummaryCard("Saídas", formatBRL(expense), Color(0xFFD32F2F))
+        SummaryCard("Entradas", formatBRL(income), Color(0xFF43A047), modifier = Modifier.weight(1f))
+        SummaryCard("Saídas", formatBRL(expense), Color(0xFFD32F2F), modifier = Modifier.weight(1f))
         SummaryCard(
             "Balanço",
             formatBRL(balance),
-            if (balance >= BigDecimal.ZERO) Color(0xFF1E88E5) else Color(0xFFD32F2F)
+            if (balance >= BigDecimal.ZERO) Color(0xFF1E88E5) else Color(0xFFD32F2F),
+            modifier = Modifier.weight(1f)
         )
     }
 }
 
 @Composable
-private fun SummaryCard(title: String, value: String, accent: Color) {
+private fun SummaryCard(title: String, value: String, accent: Color, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier
-            .weight(1f)
+        modifier = modifier
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(12.dp))
     ) {
@@ -388,7 +386,11 @@ private fun TransactionList(
     onEdit: (Item) -> Unit,
     onDelete: (Item) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
         Text("Transações", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(4.dp))
         if (items.isEmpty()) {
