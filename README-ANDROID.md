@@ -1,17 +1,24 @@
-# Kotlin Expense Tracker (Android) - Minimal Scaffold
+# Kotlin Expense Tracker (Android) - Boilerplate/Docs-only
 
-This is a minimal Android/Kotlin project scaffold to allow CI builds to succeed.
+State:
+- This folder is intentionally cleaned to a boilerplate/docs-only state.
+- No Gradle settings or app module are present.
+- A sentinel file `CI-NOT-READY` is included so CI skips Android builds.
 
-How to build locally or in CI:
-- Linux/macOS:
-  ./gradlew tasks
-  ./gradlew assembleDebug
+CI/Local builds:
+- Do NOT run Gradle here until the project is scaffolded again.
+- CI should check for `CI-NOT-READY` and skip.
 
-Notes:
-- Uses Gradle wrapper included in this repo.
-- Requires Java 17 for Android Gradle Plugin 8.x.
-- No external SDK manager steps are needed; Gradle will resolve dependencies from google() and mavenCentral().
+When you are ready to implement:
+1) Add minimal Gradle setup:
+   - settings.gradle[.kts] at project root
+   - app/build.gradle[.kts]
+   - app/src/main/ with AndroidManifest.xml and minimal sources/res
+2) Remove `CI-NOT-READY`
+3) Then build from this folder:
+   - ./gradlew tasks
+   - ./gradlew assembleDebug
 
-Module structure:
-- settings.gradle.kts includes ':app'
-- app module contains a minimal MainActivity with a simple TextView UI.
+Requirements for future builds:
+- Java 17 for AGP 8.x+.
+- Repositories: google() and mavenCentral() in settings/dependencyResolution.

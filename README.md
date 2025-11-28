@@ -1,12 +1,12 @@
 # kotlin-expense-tracker
-Personal finance tracker app built with Kotlin that allows users to add income and expense entries, navigate between months, view transactions in a filtered table, and see a real-time balance summary with formatted currency in BRL.
 
-Build (Android):
-- Ensure Java 17 is available.
-- From repository root (CI-friendly):
-  - ./gradlew tasks
-  - ./gradlew assembleDebug
-- Or from this folder:
-  - chmod +x ./gradlew
-  - ./gradlew tasks
-  - ./gradlew assembleDebug
+Current status: Boilerplate/docs-only
+- The previous Android app implementation and Gradle project were removed to reset to a clean starting point.
+- CI sentinel `CI-NOT-READY` is present; CI should skip Android build steps for this container.
+
+Next steps for implementation:
+- Recreate Gradle project (settings.gradle[.kts], app/build.gradle[.kts], and minimal app/src).
+- Remove `CI-NOT-READY` to re-enable builds.
+- Then you can run:
+  - (cd kotlin-expense-tracker && ./gradlew tasks)
+  - (cd kotlin-expense-tracker && ./gradlew assembleDebug)

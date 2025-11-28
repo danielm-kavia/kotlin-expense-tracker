@@ -1,19 +1,23 @@
 # CI Notes for kotlin-expense-tracker
 
-The Android/Kotlin app is not yet implemented beyond a placeholder. This repository currently does not contain a complete Android project (no app module, no settings.gradle, etc.), so running `./gradlew` in CI will fail.
+State: Boilerplate/docs-only. All app implementation, module configs, manifests, and resources have been intentionally removed.
 
-Why the failure occurs:
-- CI attempts to run `./gradlew` from the repository root or from this folder.
-- This folder includes wrapper files, but without a full Gradle project structure, `./gradlew` cannot execute meaningful tasks, and some CI environments may not mount executables in this path.
+CI behavior:
+- Do NOT attempt to run Gradle here. This folder is intentionally non-buildable.
+- Use a sentinel file `CI-NOT-READY` to skip build steps for this container.
 
-Actions for CI maintainers:
-- Skip or conditionally bypass Android build/test until the Android app is scaffolded.
-- Suggested guard:
-  - Check for both `settings.gradle[.kts]` and an `app/` module with a `build.gradle[.kts]` before running Gradle.
-  - Alternatively, look for a sentinel file such as `CI-NOT-READY` and skip the build if present.
+Re-enabling builds:
+- When starting implementation, add back a minimal Gradle setup:
+  - settings.gradle[.kts] with module includes
+  - app/build.gradle[.kts]
+  - app/src/main/AndroidManifest.xml and minimal sources/resources
+- After scaffolding, CI can run: (cd kotlin-expense-tracker && ./gradlew assembleDebug)
 
-When to enable Gradle:
-- After the Android project is scaffolded (settings.gradle, app/build.gradle, source sets), re-enable Gradle tasks (e.g., `./gradlew assembleDebug` or `./gradlew test`).
+Guards for CI:
+- Only run Android build if BOTH files exist:
+  - kotlin-expense-tracker/settings.gradle[.kts]
+  - kotlin-expense-tracker/app/build.gradle[.kts]
+- Or if `CI-NOT-READY` is ABSENT.
 
 Related documentation:
 - See kavia-docs/expense-tracker-react-spec-for-android-parity.md for implementation requirements.

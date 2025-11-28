@@ -1,0 +1,2 @@
+Use gradlew-kotlin-expense-tracker.sh for CI builds.
+This script respects CI-NOT-READY and avoids invoking Gradle when the Android project is not scaffolded.
